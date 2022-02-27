@@ -1,35 +1,37 @@
 import React, {useEffect, useState} from 'react';
-import { Form, DatePicker, Button, Row, Col} from 'antd';
+import { Form, DatePicker, Button, Row, Col, message} from 'antd';
 import {} from '@ant-design/icons';
 import moment from 'moment';
 
 export const Filters = (props) => {
-  const {setData, setFiltersDrawerOpen} = props;
+  const {
+    retrieveData, 
+    setFiltersDrawerOpen, 
+    startDate, 
+    setStartDate, 
+    endDate, 
+    setEndDate,
+    setFilterFormSubmitted
+  } = props;
 
-  const [startDate, setStartDate] = useState("");
-	const [endDate, setEndDate] = useState("");
-
-  const searchData = () => {
-		const filters = {
-			dateInterval: {
-				from: moment(startDate, "DD/MM/YYYY").unix() || null,
-				to: moment(endDate, "DD/MM/YYYY").unix() || null
-      },
-		};
-    console.log("filters",filters)
+  //Retrieve data from DB with filters
+  const filterData = () => {
     setFiltersDrawerOpen(false);
+    setFilterFormSubmitted(true);
+    retrieveData();
 	};
 
   const onFinishFailed = (errorInfo) => {
-    console.log('Fail:', errorInfo);
+    message.error("Failed to submit the form")
   };
+
   return (
   <div>
     <Form
       labelCol={{ span: 4 }}
       wrapperCol={{ span: 20 }}
       layout="horizontal"
-      onFinish={()=>searchData()}
+      onFinish={()=>filterData()}
       onFinishFailed={onFinishFailed}
     >
       <Form.Item label="Date">
@@ -41,18 +43,19 @@ export const Filters = (props) => {
             ],
             'This Week': [
               moment().startOf('week'),
-              moment()
+              moment().endOf('week')
             ],
             'This Month': [
               moment().startOf('month'),
-              moment()
+              moment().endOf('month')
             ]
           }}
           value={[startDate? moment(startDate,"DD/MM/YYYY"):null, endDate? moment(endDate,"DD/MM/YYYY"):null]}
           format="DD/MM/YYYY"
           onChange={(dates, dateStrings) => {
             setStartDate(dateStrings[0]);
-            setEndDate(dateStrings[1])
+            setEndDate(dateStrings[1]);
+            setFilterFormSubmitted(false);
           }}
           style={{width:"100%"}}
         />
@@ -62,7 +65,7 @@ export const Filters = (props) => {
         <Col><Button type="primary" htmlType="submit" style={{marginRight:"10px"}}>
           Submit
         </Button></Col>
-        <Col><Button htmlType="button" onClick={()=>{setStartDate(null);setEndDate(null)}}>
+        <Col><Button htmlType="button" onClick={()=>{setStartDate("");setEndDate("");setFilterFormSubmitted(false);}}>
           Reset
         </Button></Col>
       </Row>

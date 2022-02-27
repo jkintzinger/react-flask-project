@@ -1,12 +1,15 @@
 import React, {useEffect, useState} from 'react';
-import { Form, DatePicker, Button, Row, Col, Input} from 'antd';
+import { Form, DatePicker, Button, Row, Col, Input, message} from 'antd';
 import {} from '@ant-design/icons';
 import moment from 'moment';
 
 const {TextArea} = Input;
 
+const SERVER_URL = process.env.REACT_APP_SERVER_URL;
+
+
 export const UploadData = (props) => {
-  const {setData} = props;
+  const {retrieveData} = props;
 
   const [inputText, setInputText] = useState("");
 	const [date, setDate] = useState("");
@@ -25,7 +28,7 @@ export const UploadData = (props) => {
     initializeFormFields()
   }, [])
 
-
+  //Save data to the DB then retrieve all data (with filters if necessary)
   const saveData = () => {
     form.validateFields()
     .then(() =>{
@@ -33,8 +36,6 @@ export const UploadData = (props) => {
         date: moment(date, "DD/MM/YYYY").unix(),
         input: inputText
       }
-      
-      console.log("newData",newData)
       setDate("");
       setInputText("");
       initializeFormFields();
@@ -43,26 +44,26 @@ export const UploadData = (props) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newData)
       };
-      fetch('http://localhost:5000/data', requestOptions)
+      fetch(SERVER_URL+'/uploadData', requestOptions)
       .then(response => response.json())
       .then(data => {
-        if (data && data.inputs && Array.isArray(data.inputs)) {
-          setData(data.inputs)
-        }
-        console.log("post data",data )
+        console.log("uploadData data",data )
+        message.success("Your input has been saved in the database")
+        retrieveData()
       })
       .catch(error => {
-        console.log("error", error)
+        message.error("An errorr occured while saving your input")
       })
     })
     .catch((error) => {
-			console.log("An error occured");
+			message.error("Missing fields")
 		})
     
   };
   const onFinishFailed = (errorInfo) => {
-    console.log('Fail:', errorInfo);
+    message.error("Failed to submit the form")
   };
+
   return (
   <div>
     <Form

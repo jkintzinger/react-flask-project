@@ -1,50 +1,25 @@
 import React, {useEffect, useState} from 'react';
 
-import { Form, DatePicker, Card, Input, Button, Table, Row, Col, Typography, Tooltip, Drawer} from 'antd';
+import {Card, Button, Table, Row, Col, Typography, Tooltip, Drawer, message, Badge, Avatar} from 'antd';
 import {FilterOutlined} from '@ant-design/icons';
 import moment from 'moment';
 import {Filters} from "./Filters";
 import {UploadData} from "./UploadData"
+import {FakeNav} from "./FakeNav"
 
-import 'antd/dist/antd.css';
-import './App.css';
+import './css/App.less';
 
 const { Title, Text } = Typography;
 
-const fakeData = [
-  {
-    key: '1',
-    input: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. ",
-    date: 1644879600,
-  },
-  {
-    key: '2',
-    input: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
-    date: 1644879600,
-  },
-  {
-    key: '3',
-    input: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-    date: 1644879600,
-  },
-  {
-    key: '4',
-    input: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. ",
-    date: 1644879600,
-  },
-  {
-    key: '5',
-    input: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
-    date: 1644879600,
-  },
-  {
-    key: '6',
-    input: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.",
-    date: 1644879600,
-  },
-];
+const SERVER_URL = process.env.REACT_APP_SERVER_URL;
 
 const tableColumns = [
+    {
+      title: 'Id',
+      dataIndex: '_id',
+      key: '_id',
+      width: 70,
+    },
     {
       title: 'Input',
       dataIndex: 'input_data',
@@ -57,26 +32,37 @@ const tableColumns = [
       width: 150,
       render: (date) => {
         return <> {moment.unix(date).format('DD/MM/YYYY')} </>
-      }
+      },
+      sorter: (a, b) => a.date - b.date,
     },
   ]
 
 function App() {
-  const [data, setData] = useState(fakeData)
-  const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false)
-  const [newDataDrawerOpen, setNewDataDrawerOpen] = useState(false)
+  //State management
+  const [data, setData] = useState([]);
+  const [filtersDrawerOpen, setFiltersDrawerOpen] = useState(false);
+  const [newDataDrawerOpen, setNewDataDrawerOpen] = useState(false);
 
-  
-  
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-    },
-  };
+  const [startDate, setStartDate] = useState("");
+	const [endDate, setEndDate] = useState("");
+  const [filterFormSubmitted, setFilterFormSubmitted] = useState(true);
 
-  useEffect(() => {
-    const headers = { 'Content-Type': 'application/json' }
-    fetch('http://localhost:5000/data')
+  const [filterCount, setFilterCount] = useState(0);
+  
+  //Function to retrieve data from DB
+  const retrieveData = async () => {
+    const filters = {
+			dateInterval: {
+				from: moment(startDate, "DD/MM/YYYY").unix() || null,
+				to: moment(endDate, "DD/MM/YYYY").unix() || null
+      },
+		};
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({filters: filters})
+    };
+    return fetch(SERVER_URL+'/retrieveData', requestOptions)
     .then(response => response.json())
     .then(data => {
       if (data && Array.isArray(data)) {
@@ -88,35 +74,55 @@ function App() {
         })
         setData(formatedData)
       }
-      console.log("data",data )
     })
     .catch(error => {
-      console.log("error", error)
+      message.error("An errorr occured while retrieving the data")
     })
+  }
+
+  //Count the number of active filters
+  useEffect(() => {
+    if (startDate != "" && endDate != "") {
+      setFilterCount(1)
+    } else {
+      setFilterCount(0)
+    }
+  }, [startDate, endDate])
+
+  //Initializing data array
+  useEffect(() => {
+    retrieveData()
   }, [])
-  
 
   return (
     <div className="">
       <header className="App-header">
       <Col sm={22} lg={18} xxl={12}>
-        <Card title={<Title level={2} style={{marginBottom:"0px"}}>Welcome to your online storage</Title>} style={{width:"100%", overflow:"hidden"}}>
+        <Card 
+          title={<FakeNav/>} 
+          style={{width:"100%", overflow:"hidden", borderRadius:"10px"}}
+          extra={<Avatar style={{ color: '#f56a00', backgroundColor: '#fde3cf' }}>JK</Avatar>}
+        >
           <Row justify="space-between" align="middle" wrap={false} style={{marginBottom:"20px"}}>
             <Col flex="none">
               <Title level={3} style={{marginBottom:"0px"}}>Inputs</Title>
               <Text type="secondary">{`${data.length} data`}</Text>
             </Col>
             <Col flex="none">
-              <Tooltip title="Filters">
-                <Button type="primary" shape="circle" size='large' icon={<FilterOutlined />} onClick={()=>setFiltersDrawerOpen(true)}/>
-              </Tooltip>
+              <Badge size="small" count={filterCount}>
+                <Tooltip title="Filters">
+                  <Button type="primary" shape="circle" size='large' icon={<FilterOutlined />} onClick={()=>setFiltersDrawerOpen(true)}/>
+                </Tooltip>
+              </Badge>
               <Button type="primary" size="large" onClick={()=>setNewDataDrawerOpen(true)} style={{borderRadius:"5px", marginLeft:"20px"}}>Add data</Button>
             </Col>
           </Row>
             
           <Table
             rowSelection={{
-              ...rowSelection,
+              onChange: (selectedRowKeys, selectedRows) => {
+                console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+              },
             }}
             columns={tableColumns}
             dataSource={data}
@@ -125,20 +131,33 @@ function App() {
               scrollToFirstRowOnChange: true,
               y: 300 
             }}
+            style={{height:"420px"}}
           />
-
+          
           <Drawer
             title="Filters"
             placement="right"
             closable={true}
-            onClose={()=>setFiltersDrawerOpen(false)}
+            onClose={()=>{
+              console.log('hey',filterFormSubmitted, !filterFormSubmitted)
+              setFiltersDrawerOpen(false);
+              if (!filterFormSubmitted) {
+                retrieveData();
+                setFilterFormSubmitted(true);
+              }
+            }}
             visible={filtersDrawerOpen}
             getContainer={false}
             style={{ position: 'absolute' }}
           >
             <Filters
+              startDate={startDate}
+              setStartDate={setStartDate}
+              endDate={endDate}
+              setEndDate={setEndDate}
               setFiltersDrawerOpen={setFiltersDrawerOpen}
-              setData={setData}
+              setFilterFormSubmitted={setFilterFormSubmitted}
+              retrieveData={retrieveData}
             />
           </Drawer> 
           <Drawer
@@ -152,7 +171,7 @@ function App() {
             width={"60%"}
           >
             <UploadData
-              setData={setData}
+              retrieveData={retrieveData}
             />
           </Drawer> 
         </Card>
