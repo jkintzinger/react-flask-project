@@ -6,7 +6,8 @@ import moment from 'moment';
 const {TextArea} = Input;
 
 export const UploadData = (props) => {
-  //const {startDate, setStartDate, endDate, setEndDate, searchData} = props;
+  const {setData} = props;
+
   const [inputText, setInputText] = useState("");
 	const [date, setDate] = useState("");
 
@@ -32,10 +33,27 @@ export const UploadData = (props) => {
         date: moment(date, "DD/MM/YYYY").unix(),
         input: inputText
       }
+      
       console.log("newData",newData)
       setDate("");
       setInputText("");
       initializeFormFields();
+      const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newData)
+      };
+      fetch('http://localhost:5000/data', requestOptions)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.inputs && Array.isArray(data.inputs)) {
+          setData(data.inputs)
+        }
+        console.log("post data",data )
+      })
+      .catch(error => {
+        console.log("error", error)
+      })
     })
     .catch((error) => {
 			console.log("An error occured");

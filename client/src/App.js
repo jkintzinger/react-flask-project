@@ -47,7 +47,7 @@ const fakeData = [
 const tableColumns = [
     {
       title: 'Input',
-      dataIndex: 'input',
+      dataIndex: 'input_data',
       key: 'input',
     },
     {
@@ -56,7 +56,7 @@ const tableColumns = [
       key: 'date',
       width: 150,
       render: (date) => {
-        <>{moment.unix(date).format('DD/MM/YYYY')}</>
+        return <> {moment.unix(date).format('DD/MM/YYYY')} </>
       }
     },
   ]
@@ -74,6 +74,26 @@ function App() {
     },
   };
 
+  useEffect(() => {
+    const headers = { 'Content-Type': 'application/json' }
+    fetch('http://localhost:5000/data')
+    .then(response => response.json())
+    .then(data => {
+      if (data && Array.isArray(data)) {
+        const formatedData = data.map(oneData => {
+          return {
+            ...oneData,
+            key: oneData._id
+          }
+        })
+        setData(formatedData)
+      }
+      console.log("data",data )
+    })
+    .catch(error => {
+      console.log("error", error)
+    })
+  }, [])
   
 
   return (
@@ -131,7 +151,9 @@ function App() {
             style={{ position: 'absolute' }}
             width={"60%"}
           >
-            <UploadData/>
+            <UploadData
+              setData={setData}
+            />
           </Drawer> 
         </Card>
       </Col>
@@ -140,34 +162,4 @@ function App() {
   );
 }
 
-/**
- * const onFinish = (values) => {
-    console.log('Success:', values);
-  };
-  const onFinishFailed = (errorInfo) => {
-    console.log('Fail:', errorInfo);
-  };
- * 
- * <Form
-          labelCol={{ span: 4 }}
-          wrapperCol={{ span: 14 }}
-          layout="vertical"
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-        >
-          
-          <Form.Item label="Input">
-            <TextArea rows={1} />
-          </Form.Item>
-          <Form.Item label="Date picker">
-            <DatePicker/>
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
-          
-        </Form>
- */
 export default App;
