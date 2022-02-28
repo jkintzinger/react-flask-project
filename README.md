@@ -10,7 +10,7 @@ The project is divided into two components: client (frontend), server (backend).
 
 ## Installation
 
-You will need too install both client and server on your machine, but first clone the repo:
+You will need to install both client and server on your machine, but first clone the repo:
 
 .1. Clone the repo
 ```sh
