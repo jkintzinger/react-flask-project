@@ -1,4 +1,4 @@
-# Input storage - client
+# Input storage
 
 This project is a basic react-flask-app that enables you to upload some inputs, visualize them and filter them through a date range.
 The project is divided into two components: client (frontend), server (backend). 
