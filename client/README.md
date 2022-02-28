@@ -1,6 +1,4 @@
-<p align="center">
-  <h3 align="center">Input storage - client</h3>
-</p>
+# Input storage - client
 
 ## Build with
 
@@ -10,7 +8,7 @@
 
 <!-- GETTING STARTED -->
 
-### Installation
+## Installation
 You will need node to be installed on your machine
 
 

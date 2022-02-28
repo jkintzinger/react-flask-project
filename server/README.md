@@ -1,10 +1,8 @@
-<p align="center">
-  <h3 align="center">Input storage - server</h3>
-</p>
+# Input storage - server
 
 ## Build with
 
-* [Python 3.7+](https://www.python.org/) (version tested: 3.7.7 - 3.9.6)
+* [Python 3.7+](https://www.python.org/)
 * [Flask 2.0](https://flask.palletsprojects.com/en/2.0.x/)
 * [SQLAlchemy 1.4](https://www.sqlalchemy.org/)
 

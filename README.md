@@ -1,18 +1,14 @@
-<p align="center">
-  <h3 align="center">Input storage - client</h3>
+# Input storage - client
 
-  <p align="center">
-    This project is a basic react-flask-app that enables you to upload some inputs, visualize them and filter them through a date range.
-    The project is divided into two components: client (frontend), server (backend). 
-  </p>
-</p>
+This project is a basic react-flask-app that enables you to upload some inputs, visualize them and filter them through a date range.
+The project is divided into two components: client (frontend), server (backend). 
 
 ## Build with
 
 * [React] -> frontend
 * [Flask] -> backend
 
-### Installation
+## Installation
 
 You will need too install both client and server on your machine, but first clone the repo:
 
